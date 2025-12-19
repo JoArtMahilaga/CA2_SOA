@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>GameShelf Store</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<header class="steam-top">
+    <div class="steam-inner">
+        <div class="logo">
+            <img class="logo-dot" src="/client/gameicon.png" alt="GameShelf" />
+            <div class="logo-text">
+                <div class="logo-title">GameShelf</div>
+                <div class="logo-sub">Maestro 69 at your service</div>
+            </div>
+        </div>
+
+        <nav class="nav">
+            <a href="#store" class="nav-link">Store</a>
+            <a href="#admin" class="nav-link">Add Game</a>
+            <a href="/swagger" class="nav-link" target="_blank" rel="noopener">Swagger</a>
+        </nav>
+
+        <div class="top-actions">
+            <button class="btn ghost theme-toggle" id="btnTheme" type="button" aria-label="Toggle theme">
+                <span id="themeIcon" aria-hidden="true">🌙</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <button class="btn primary" id="btnExportBackup" type="button">Export Backup</button>
+        </div>
+    </div>
+</header>
+
+<main class="steam-layout">
+    <aside class="steam-side">
+        <section class="side-block">
+            <div class="side-head">
+                <h3>Connection</h3>
+                <div class="side-sub"></div>
+            </div>
+
+            <label for="apiBase">API base</label>
+            <input id="apiBase" placeholder="https://localhost:xxxx" />
+
+            <label for="token">JWT token</label>
+            <input id="token" placeholder="eyJ..." />
+
+            <label for="rawgKey">RAWG key (optional)</label>
+            <input id="rawgKey" placeholder="rawg api key" />
+
+            <div class="row">
+                <button class="btn" id="btnSave" type="button">Save</button>
+                <button class="btn ghost" id="btnClear" type="button">Clear</button>
+            </div>
+
+            <div class="hint">
+               Token is used for all /api calls.
+            </div>
+        </section>
+
+        <section class="side-block">
+            <div class="side-head">
+                <h3>Account</h3>
+                <div class="side-sub"></div>
+            </div>
+
+            <div id="signedInUi" style="display:none">
+                <div class="hint" id="signedInText">Signed in</div>
+                <div class="row">
+                    
+                    <button class="btn ghost" id="btnLogout" type="button">Logout</button>
+                </div>
+            </div>
+
+            <div id="authUi">
+                <div class="seg" style="position:relative; z-index:2; pointer-events:auto;">
+                    <button class="seg-btn active" id="segLogin" type="button" style="pointer-events:auto;">Sign in</button>
+                    <button class="seg-btn" id="segRegister" type="button" style="pointer-events:auto;">Register</button>
+                </div>
+
+                <div class="form" style="padding-top:10px">
+                    <div id="loginPanel">
+                        <label for="loginUser">Username or email</label>
+                        <input id="loginUser" autocomplete="username" />
+
+                        <label for="loginPass">Password</label>
+                        <input id="loginPass" type="password" autocomplete="current-password" />
+
+                        <div class="row">
+                            <button class="btn primary" id="btnLogin" type="button">Login</button>
+                            <button class="btn ghost" id="btnMe" type="button">Me</button>
+                        </div>
+
+                        <div class="out">
+                            <div class="out-head">
+                                <div class="out-title">Auth output</div>
+                                <button class="btn tiny ghost" id="btnClearAuth" type="button">Clear</button>
+                            </div>
+                            <pre id="outAuth">{}</pre>
+                        </div>
+                    </div>
+
+                    <div id="registerPanel" style="display:none">
+                        <label for="regUser">Username</label>
+                        <input id="regUser" autocomplete="username" />
+
+                        <label for="regEmail">Email</label>
+                        <input id="regEmail" autocomplete="email" />
+
+                        <label for="regPass">Password</label>
+                        <input id="regPass" type="password" autocomplete="new-password" />
+
+                        <button class="btn primary" id="btnRegister" type="button">Register</button>
+
+                        <div class="out">
+                            <div class="out-head">
+                                <div class="out-title">Register output</div>
+                            </div>
+                            <pre id="outReg">{}</pre>
+                        </div>
+                    </div>
+
+                    <div id="authErrors" class="errors" style="display:none"></div>
+                </div>
+            </div>
+        </section>
+
+        
+    </aside>
+
+    <section class="steam-main">
+        <section class="panel" id="store">
+            <div class="panel-head">
+                <h2>Store</h2>
+
+                <div class="panel-actions" style="gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                    <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                        <div style="min-width:220px;">
+                            <label for="fSearch" class="muted small" style="display:block; margin-bottom:6px;">Search</label>
+                            <input id="fSearch" placeholder="Search titles..." />
+                        </div>
+
+                        <div style="min-width:180px;">
+                            <label for="fSort" class="muted small" style="display:block; margin-bottom:6px;">Sort</label>
+                            <select id="fSort">
+                                <option value="year_desc">Year (newest)</option>
+                                <option value="year_asc">Year (oldest)</option>
+                                <option value="title_asc">Title (A–Z)</option>
+                                <option value="title_desc">Title (Z–A)</option>
+                                <option value="id_desc">ID (newest)</option>
+                                <option value="id_asc">ID (oldest)</option>
+                            </select>
+                        </div>
+
+                        <div style="min-width:180px;">
+                            <label for="fGenre" class="muted small" style="display:block; margin-bottom:6px;">Genre</label>
+                            <select id="fGenre">
+                                <option value="">All genres</option>
+                            </select>
+                        </div>
+
+                        <div style="min-width:180px;">
+                            <label for="fPlatform" class="muted small" style="display:block; margin-bottom:6px;">Platform</label>
+                            <select id="fPlatform">
+                                <option value="">All platforms</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <button class="btn" id="btnRefresh2" type="button">Refresh</button>
+                        <button class="btn ghost" id="btnClearList" type="button">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="games-grid" id="gamesGrid"></div>
+
+            <div class="out">
+                <div class="out-head">
+                    <div class="out-title">Raw response</div>
+                </div>
+                <pre id="outList">[]</pre>
+            </div>
+        </section>
+
+        <section class="panel" id="admin">
+            <div class="panel-head">
+                <h2>Add a game</h2>
+                <div class="panel-actions">
+                    <button class="btn" id="btnAutofill" type="button">Auto fill</button>
+                    <button class="btn primary" id="btnCreate" type="button">Create</button>
+                    <button class="btn ghost" id="btnClearCreate" type="button">Clear</button>
+                </div>
+            </div>
+
+            <div class="form">
+                <div class="row2">
+                    <div>
+                        <label for="gTitle">Title</label>
+                        <input id="gTitle" />
+                    </div>
+                    <div>
+                        <label for="gPlatform">Platform</label>
+                        <select id="gPlatform">
+                            <option value="">Select platform</option>
+                            <option value="PC">PC</option>
+                            <option value="PlayStation">PlayStation</option>
+                            <option value="Xbox">Xbox</option>
+                            <option value="Switch">Switch</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row2">
+                    <div>
+                        <label for="gYear">Release year</label>
+                        <input id="gYear" inputmode="numeric" placeholder="2020" />
+                    </div>
+                    <div>
+                        <label for="gGenreId">Genre</label>
+                        <select id="gGenreId">
+                            <option value="">No genre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label for="gImageUrl">Image URL</label>
+                <input id="gImageUrl" placeholder="" />
+
+                <div class="hint" id="autofillHint"></div>
+
+                <label for="gDesc">Description</label>
+                <textarea id="gDesc"></textarea>
+
+                <div id="createErrors" class="errors" style="display:none"></div>
+
+                <div class="img-preview" id="imgPreviewWrap">
+                    <div class="img-preview-label">Preview</div>
+                    <div class="muted small" id="imgPreviewMsg">No image</div>
+                    <img id="imgPreview" alt="preview" style="display:none" referrerpolicy="no-referrer" crossorigin="anonymous" loading="lazy" />
+                </div>
+
+                <div class="out">
+                    <div class="out-head">
+                        <div class="out-title">Create output</div>
+                    </div>
+                    <pre id="outCreate">{}</pre>
+                </div>
+            </div>
+        </section>
+    </section>
+</main>
+
+
+
+<script src="./theme.js"></script>
+
+<script>
+    (() => {
+        const sync = () => {
+            const src = document.getElementById("fGenre");
+            const dst = document.getElementById("gGenreId");
+            if (!src || !dst) return;
+
+            const current = dst.value;
+            const opts = Array.from(src.querySelectorAll("option"))
+                .map(o => ({ v: (o.value || "").trim(), t: (o.textContent || "").trim() }))
+                .filter(o => o.v);
+
+            dst.innerHTML =
+                `<option value="">No genre</option>` +
+                opts.map(o => `<option value="${o.v}">${o.t}</option>`).join("");
+
+            if (current) dst.value = current;
+        };
+
+        const src = document.getElementById("fGenre");
+        if (src) new MutationObserver(sync).observe(src, { childList: true });
+        window.addEventListener("DOMContentLoaded", sync);
+    })();
+</script>
+
+<script>
+    (() => {
+        const setAuthModeLocal = (mode) => {
+            const segLogin = document.getElementById("segLogin");
+            const segRegister = document.getElementById("segRegister");
+            const loginPanel = document.getElementById("loginPanel");
+            const registerPanel = document.getElementById("registerPanel");
+            const authErrors = document.getElementById("authErrors");
+
+            if (mode === "login") {
+                segLogin && segLogin.classList.add("active");
+                segRegister && segRegister.classList.remove("active");
+                loginPanel && (loginPanel.style.display = "block");
+                registerPanel && (registerPanel.style.display = "none");
+            } else {
+                segRegister && segRegister.classList.add("active");
+                segLogin && segLogin.classList.remove("active");
+                loginPanel && (loginPanel.style.display = "none");
+                registerPanel && (registerPanel.style.display = "block");
+            }
+
+            if (authErrors) {
+                authErrors.style.display = "none";
+                authErrors.textContent = "";
+            }
+        };
+
+        const segLogin = document.getElementById("segLogin");
+        const segRegister = document.getElementById("segRegister");
+
+        if (segLogin) segLogin.addEventListener("click", () => setAuthModeLocal("login"));
+        if (segRegister) segRegister.addEventListener("click", () => setAuthModeLocal("register"));
+    })();
+</script>
+
+<script>
+    (() => {
+        const tokenEl = document.getElementById("token");
+        const authUi = document.getElementById("authUi");
+        const signedInUi = document.getElementById("signedInUi");
+        const signedInText = document.getElementById("signedInText");
+
+        const btnLogout = document.getElementById("btnLogout");
+        const btnMeSignedIn = document.getElementById("btnMeSignedIn");
+        const btnMe = document.getElementById("btnMe");
+
+        const looksLikeJwt = (t) => {
+            if (!t) return false;
+            const s = String(t).trim();
+            const parts = s.split(".");
+            return parts.length === 3 && s.length > 20;
+        };
+
+        const setSignedIn = (on) => {
+            if (!authUi || !signedInUi) return;
+            authUi.style.display = on ? "none" : "block";
+            signedInUi.style.display = on ? "block" : "none";
+
+            if (signedInText && on) {
+                signedInText.textContent = "Signed in";
+            }
+        };
+
+        const update = () => {
+            if (!tokenEl) return;
+            setSignedIn(looksLikeJwt(tokenEl.value));
+        };
+
+        if (tokenEl) {
+            tokenEl.addEventListener("input", update);
+            tokenEl.addEventListener("change", update);
+        }
+
+        if (btnMeSignedIn && btnMe) {
+            btnMeSignedIn.addEventListener("click", () => btnMe.click());
+        }
+
+        if (btnLogout && tokenEl) {
+            btnLogout.addEventListener("click", () => {
+                tokenEl.value = "";
+                try {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("jwt");
+                    localStorage.removeItem("jwtToken");
+                } catch {}
+                tokenEl.dispatchEvent(new Event("input", { bubbles: true }));
+            });
+        }
+
+        window.addEventListener("DOMContentLoaded", update);
+        setTimeout(update, 0);
+    })();
+</script>
+
+<div style="display:none">
+    <button id="btnRefresh" type="button">Refresh</button>
+    <button id="btnDoSearch" type="button">Search</button>
+    <button id="btnClearFilters" type="button">Clear filters</button>
+    <label><input type="checkbox" id="fHasImage" /> Has image</label>
+    <div id="featuredTiles"></div>
+    <section id="featuredHero"></section>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
+ 
