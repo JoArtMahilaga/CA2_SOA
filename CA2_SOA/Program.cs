@@ -198,3 +198,4 @@ sealed class SwaggerAuthOperationFilter : IOperationFilter
         });
     }
 }
+ 
