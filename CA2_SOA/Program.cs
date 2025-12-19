@@ -119,14 +119,30 @@ public class Program
             }
         }
 
+        app.UseHttpsRedirection();
+
+        var iconPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "gameicon.png");
+
+        app.Use(async (ctx, next) =>
+        {
+            var p = ctx.Request.Path.Value;
+
+            if ((p == "/swagger/favicon-16x16.png" || p == "/swagger/favicon-32x32.png") && File.Exists(iconPath))
+            {
+                ctx.Response.ContentType = "image/png";
+                await ctx.Response.SendFileAsync(iconPath);
+                return;
+            }
+
+            await next();
+        });
+
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "CA2SOA v1");
             c.ConfigObject.PersistAuthorization = true;
         });
-
-        app.UseHttpsRedirection();
 
         // Website at client (wwwroot/client/index.html)
         var clientRoot = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "client");
@@ -149,7 +165,7 @@ public class Program
 
         app.MapControllers();
 
-        app.MapGet("/", () => Results.Redirect("/swagger"));
+        app.MapGet("/", () => Results.Redirect("/client")).AllowAnonymous();
 
         app.Run();
     }
